@@ -42,13 +42,14 @@ describe('the notification bus', () => {
   it('records an alert and posts it to a Feishu channel, with the webhook never read back', async () => {
     const poster1 = poster()
     const lab = labWith(poster1.post, 'alerts-feishu')
-    const added = await call(lab, 'POST', '/api/alerts/channels', { id: 'lab', kind: 'feishu', title: 'BOARDLAB告警群', url: 'https://open.feishu.cn/open-apis/bot/v2/hook/2f3d78b2-f1bd-4443-b5e9-491f342f5f73' })
-    expect(added.channel.url).toMatch(/^https:\/\/open\.feishu\.cn\/…02f3…$|…/)
-    expect(JSON.stringify(await call(lab, 'GET', '/api/alerts'))).not.toContain('2f3d78b2-f1bd-4443-b5e9-491f342f5f73')
+    const webhook = 'https://open.feishu.cn/open-apis/bot/v2/hook/00000000-0000-0000-0000-000000000000'
+    const added = await call(lab, 'POST', '/api/alerts/channels', { id: 'lab', kind: 'feishu', title: 'BOARDLAB告警群', url: webhook })
+    expect(added.channel.url).toMatch(/^https:\/\/open\.feishu\.cn\/…0000…$|…/)
+    expect(JSON.stringify(await call(lab, 'GET', '/api/alerts'))).not.toContain('00000000-0000-0000-0000-000000000000')
     const { alert } = await call(lab, 'POST', '/api/alerts', { topic: 'failed', title: 'board-1：复位失败', body: 'GPIO 超时', board: 'board-1' })
     expect(alert.delivered).toEqual([{ channel: 'lab', ok: true, detail: 'HTTP 200' }])
     expect(poster1.sent).toHaveLength(1)
-    expect(poster1.sent[0]!.url).toContain('2f3d78b2-f1bd-4443-b5e9-491f342f5f73')
+    expect(poster1.sent[0]!.url).toBe(webhook)
     // Feishu's interactive card: a coloured header, the alert's own words, and its fields.
     expect(poster1.sent[0]!.payload).toMatchObject({ msg_type: 'interactive', card: { header: { template: 'red', title: { tag: 'plain_text', content: 'board-1：复位失败' } } } })
     expect(JSON.stringify(poster1.sent[0]!.payload.card.elements)).toContain('GPIO 超时')

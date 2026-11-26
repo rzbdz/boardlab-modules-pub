@@ -70,6 +70,21 @@ describe('the page parts the market carries', () => {
   })
 })
 
+describe('nothing in what is published is a credential', () => {
+  // A Feishu webhook is the credential of one group: once it is in a public repository, anyone may post to that group.
+  // Only this file's and a module's own tests may name one, and never a real one.
+  const FILES = /\.(ts|js|json|md)$/
+  const WEBHOOK = /open-apis\/bot\/v2\/hook\/([0-9a-fA-F-]{8,})/
+  it('carries no webhook but a placeholder one', () => {
+    for (const path of execFileSync('git', ['ls-files'], { cwd: here, encoding: 'utf8' }).split('\n').filter(Boolean)) {
+      if (!FILES.test(path)) continue
+      for (const match of readFileSync(join(here, path), 'utf8').matchAll(new RegExp(WEBHOOK, 'g'))) {
+        expect(match[1], `${path}: a webhook in a public file is a credential`).toMatch(/^0[0-9a-f]{7}-0{4}-0{4}-0{4}-0{12}$/)
+      }
+    }
+  })
+})
+
 describe('this market as boardd loads it', () => {
   it('is what the manifest says, read by the reader boardd uses', () => {
     // The real reader, run in a child: the market's own tests do not depend on the distribution's source layout.
