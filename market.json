@@ -37,6 +37,37 @@
       "cli": "feedback/cli.ts",
       "inject": [],
       "provide": []
+    },
+    {
+      "id": "alerts",
+      "title": "通知",
+      "about": "通知总线：失败、等人、老化匹配都记下来，按渠道规则推到飞书群（交互式卡片）或页面；带 boardlab alerts 命令",
+      "tags": [
+        "notifications",
+        "alerts"
+      ],
+      "entry": "alerts/index.ts",
+      "ui": "alerts/ui.js",
+      "cli": "alerts/cli.ts",
+      "inject": [],
+      "provide": []
+    },
+    {
+      "id": "console-watch",
+      "title": "串口监控",
+      "about": "串口监控：老化/长跑时盯多块板的串口，命中设定的一行或该来的输出断了，就发到通知总线；带 boardlab watch 命令",
+      "tags": [
+        "console",
+        "watch",
+        "aging"
+      ],
+      "entry": "console-watch/index.ts",
+      "ui": "console-watch/ui.js",
+      "cli": "console-watch/cli.ts",
+      "inject": [
+        "alerts"
+      ],
+      "provide": []
     }
   ]
 }

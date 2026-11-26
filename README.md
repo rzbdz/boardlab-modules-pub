@@ -16,6 +16,8 @@ boardlab market show pub
 | `nexus-images` | Nexus raw 仓库的镜像市场 | `images` `market` |
 | `human` | 人工请求：AI 请人插拔线、接板子、按按钮，人点「我做好了」；带 `boardlab ask` 命令 | `human` |
 | `feedback` | 反馈：AI 用 boardlab 时提的请求，维护的人看和关闭；带 `boardlab feedback` 命令 | `feedback` |
+| `alerts` | 通知总线：失败、等人、老化匹配记下来，推到飞书群（交互式卡片）或页面；带 `boardlab alerts` 命令 | `notifications` |
+| `console-watch` | 串口监控：老化/长跑时盯多块板的串口，命中或缺行发到通知总线；带 `boardlab watch` 命令，要 `alerts` | `console` `watch` |
 
 ## 写一个模块
 
