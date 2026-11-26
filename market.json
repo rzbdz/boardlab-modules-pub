@@ -188,7 +188,10 @@
       "ui": "boardctrl/ui.js",
       "cli": "boardctrl/cli.ts",
       "inject": [],
-      "provide": []
+      "provide": [],
+      "was": [
+        "bsp"
+      ]
     }
   ]
 }
