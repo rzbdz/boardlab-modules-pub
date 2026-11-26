@@ -1,0 +1,13 @@
+{
+  "name": "boardlab-modules-pub",
+  "private": true,
+  "type": "module",
+  "description": "boardlab 的公共模块市场：随 boardlab 发布的模块之外，可以从这里装模块",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "typescript": "6.0.3"
+  }
+}

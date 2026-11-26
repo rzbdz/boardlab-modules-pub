@@ -1,0 +1,13 @@
+{
+  "modules": [
+    {
+      "id": "nexus-images",
+      "title": "Nexus 镜像市场",
+      "about": "Nexus raw 仓库的镜像市场：目录是文件夹，文件是镜像；哪个目录属于哪个 SoC 由市场的设置说",
+      "tags": ["images", "market"],
+      "entry": "nexus-images/module.ts",
+      "inject": [],
+      "provide": []
+    }
+  ]
+}
