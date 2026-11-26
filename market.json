@@ -81,6 +81,19 @@
       "ui": "market/ui.js",
       "inject": [],
       "provide": []
+    },
+    {
+      "id": "sftp-images",
+      "title": "构建服务器镜像市场",
+      "about": "构建服务器上的目录（ssh 登录）：每个目录是一个文件夹，里面符合 glob 的文件是镜像；机器、目录和 SoC 在市场设置里配",
+      "tags": [
+        "images",
+        "market",
+        "ssh"
+      ],
+      "entry": "sftp-images/index.ts",
+      "inject": [],
+      "provide": []
     }
   ]
 }
