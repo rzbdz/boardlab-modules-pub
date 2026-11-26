@@ -18,6 +18,8 @@ boardlab market show pub
 | `feedback` | 反馈：AI 用 boardlab 时提的请求，维护的人看和关闭；带 `boardlab feedback` 命令 | `feedback` |
 | `alerts` | 通知总线：失败、等人、老化匹配记下来，推到飞书群（交互式卡片）或页面；带 `boardlab alerts` 命令 | `notifications` |
 | `console-watch` | 串口监控：老化/长跑时盯多块板的串口，命中或缺行发到通知总线；带 `boardlab watch` 命令，要 `alerts` | `console` `watch` |
+| `market` | 模块市场自己的页面：加市场、装/卸模块、拉新版本并让 boardd 重新加载 | `module` `market` |
+| `sftp-images` | 构建服务器上的目录（ssh）：每个目录是一个文件夹，里面符合 glob 的文件是镜像 | `images` `ssh` |
 
 ## 写一个模块
 
