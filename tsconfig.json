@@ -13,11 +13,16 @@
     "paths": {
       "boardlab": [
         "../better-boardlab/core/src/sdk.ts"
+      ],
+      "boardlab/ui": [
+        "../better-boardlab/src/sdk.browser.ts"
+      ],
+      "boardlab-core/*": [
+        "../better-boardlab/core/src/*"
       ]
     }
   },
   "include": [
-    "*/module.ts",
-    "*/module.js"
+    "*/**/*.ts"
   ]
 }

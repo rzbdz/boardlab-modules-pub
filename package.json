@@ -5,10 +5,12 @@
   "description": "boardlab 的公共模块市场：随 boardlab 发布的模块之外，可以从这里装模块",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "build": "node build.mjs"
   },
   "devDependencies": {
     "@types/node": "22.20.5",
+    "esbuild": "0.27.7",
     "typescript": "6.0.3",
     "vitest": "4.1.12"
   }

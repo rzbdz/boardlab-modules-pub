@@ -20,7 +20,21 @@
         "human"
       ],
       "entry": "human/index.ts",
+      "ui": "human/ui.js",
       "cli": "human/cli.ts",
+      "inject": [],
+      "provide": []
+    },
+    {
+      "id": "feedback",
+      "title": "反馈",
+      "about": "反馈：AI 用 boardlab 时提的请求和意见，存在 boardd 的数据库里，等维护的人处理",
+      "tags": [
+        "feedback"
+      ],
+      "entry": "feedback/index.ts",
+      "ui": "feedback/ui.js",
+      "cli": "feedback/cli.ts",
       "inject": [],
       "provide": []
     }

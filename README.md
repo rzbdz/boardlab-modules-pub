@@ -14,6 +14,8 @@ boardlab market show pub
 | 模块 | 带来什么 | 标签 |
 | --- | --- | --- |
 | `nexus-images` | Nexus raw 仓库的镜像市场 | `images` `market` |
+| `human` | 人工请求：AI 请人插拔线、接板子、按按钮，人点「我做好了」；带 `boardlab ask` 命令 | `human` |
+| `feedback` | 反馈：AI 用 boardlab 时提的请求，维护的人看和关闭；带 `boardlab feedback` 命令 | `feedback` |
 
 ## 写一个模块
 
@@ -36,10 +38,46 @@ export default {
 - `inject` 声明需要的服务，`provide` 声明提供的服务：缺的服务没人给时，模块在 boardd 里是「等着」，不会启动。
 - 模块更新在 boardd 下次启动生效。
 
+### 页面、命令和帮助
+
+市场里的模块可以带三样和它一起走的东西，都在 `market.json` 那一项里写：
+
+| 字段 | 是什么 |
+| --- | --- |
+| `ui` | 页面部分：`{ module, views }`，浏览器直接 import 这个文件。必须 `import … from 'boardlab/ui'`（页面的 import map 指到 boardd 自己的 SDK），不能 import 市场里的别的文件 |
+| `cli` | `boardlab` 命令：导出 `{ title, commands }`（`RemoteCommandGroup`）。命令在装了模块的 boardd 上跑，用 `ctx.client` 访问 boardd |
+| `docs` | 帮助页目录，默认是入口旁边的 `docs/`。每个 `.md` 是一页，名字是 `<模块>/<文件名>`，页面上 `view.help` 写这个名字 |
+
+`ui` 写的是**浏览器能直接跑的文件**（`.js`）。用 TypeScript 写源码的话，把它编译好再提交：
+
+```sh
+pnpm build     # 每个带 ui 的模块：<模块>/ui.ts -> <模块>/ui.js，把 boardlab/ui 留在外面
+```
+
+`ui.js` 是构建产物，也要提交：市场是 git clone 的，boardd 不编译。
+
+```ts
+export const ui = {
+  module: 'hello',
+  views: (state) => [{ id: 'hello', slot: 'page', title: 'Hello', help: 'hello/hello', body: [] }],
+}
+```
+
+```ts
+export const commands = {
+  title: 'Hello', id: 'hello',
+  commands: [{
+    name: 'hello', noBoard: true, usage: ['hello [名字]\t打个招呼'],
+    async run({ args, client }) { console.log(await client.call('GET', '/api/hello')) },
+  }],
+}
+```
+
 模块在市场里的依赖就用 `inject`：`nexus-spacemit` 写 `inject: ["nexus"]`，而不是把目录套进 `nexus/` 里。
 
 ## 加上一个模块
 
 1. `mkdir <模块>`，写 `<模块>/module.js`（或`.ts`）。
-2. 在 `market.json` 的 `modules` 里加一项：`id`、`title`、`about`、`tags`、`inject`/`provide`。
+2. 在 `market.json` 的 `modules` 里加一项：`id`、`title`、`about`、`tags`、`inject`/`provide`，有页面、命令或帮助就再写 `ui`、`cli`、`docs`。
+   页面部分用 `pnpm build` 编译，和源码一起提交。
 3. 提交，推上来。装了市场的机器 `boardlab market update pub` 就能看到改了什么。
