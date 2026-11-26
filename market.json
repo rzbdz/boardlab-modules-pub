@@ -131,6 +131,64 @@
       "ui": "clients/ui.js",
       "inject": [],
       "provide": []
+    },
+    {
+      "id": "local",
+      "title": "本机板子",
+      "about": "接在本机上的板子：槽位、serial-mux 串口、本机 fastboot、扫描",
+      "tags": [
+        "lab",
+        "boards",
+        "serial"
+      ],
+      "entry": "local/catalog.ts",
+      "ui": "local/ui.js",
+      "inject": [],
+      "provide": []
+    },
+    {
+      "id": "home-assistant",
+      "title": "Home Assistant 槽位",
+      "about": "Home Assistant 上的复位/下载开关：槽位跟着控制器走（要 local）",
+      "tags": [
+        "lab",
+        "boards",
+        "home-assistant"
+      ],
+      "entry": "home-assistant/catalog.ts",
+      "ui": "home-assistant/ui.js",
+      "inject": [],
+      "provide": []
+    },
+    {
+      "id": "script-slots",
+      "title": "脚本槽位",
+      "about": "脚本驱动的槽位：用智能插座之类的脚本复位板子（要 local）",
+      "tags": [
+        "lab",
+        "boards",
+        "script"
+      ],
+      "entry": "script-slots/catalog.ts",
+      "ui": "script-slots/ui.js",
+      "inject": [],
+      "provide": []
+    },
+    {
+      "id": "boardctrl",
+      "title": "boardctrl 板卡主机",
+      "about": "boardctrl 板卡主机和 SDK：板子接在别的 Linux 机器上，boardd 用 ssh 给它装上 boardctrld 并接入",
+      "tags": [
+        "lab",
+        "boards",
+        "boardctrl",
+        "sdk"
+      ],
+      "entry": "boardctrl/catalog.ts",
+      "ui": "boardctrl/ui.js",
+      "cli": "boardctrl/cli.ts",
+      "inject": [],
+      "provide": []
     }
   ]
 }

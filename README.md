@@ -21,6 +21,10 @@ boardlab market show pub
 | `market` | 模块市场自己的页面：加市场、装/卸模块、拉新版本并让 boardd 重新加载 | `module` `market` |
 | `sftp-images` | 构建服务器上的目录（ssh）：每个目录是一个文件夹，里面符合 glob 的文件是镜像 | `images` `ssh` |
 | `clients` | 给编译机、笔记本装 boardlab 命令行，连到这台 boardd：加机器、装、看状态、删（页面上做） | `clients` `ssh` |
+| `local` | 接在本机上的板子：槽位、serial-mux 串口、本机 fastboot、扫描 | `lab` `boards` `serial` |
+| `home-assistant` | Home Assistant 上的复位/下载开关，槽位跟着控制器走（要 `local`） | `lab` `boards` |
+| `script-slots` | 脚本驱动的槽位：智能插座之类的脚本复位（要 `local`） | `lab` `boards` |
+| `boardctrl` | boardctrl 板卡主机和 SDK：板子接在别的 Linux 机器上，boardd 用 ssh 装上 boardctrld；带 `boardlab host`、`boardlab registry` 等命令 | `lab` `boards` `sdk` |
 
 ## 写一个模块
 

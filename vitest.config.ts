@@ -17,5 +17,5 @@ export default defineConfig({
       { find: /^boardlab$/, replacement: resolve(boardlab, 'core/src/sdk.ts') },
     ],
   },
-  test: { include: ['market.test.ts', '*/test.ts', '*/ui.test.ts'], environment: 'node' },
+  test: { include: ['market.test.ts', '*/test.ts', '*/ui.test.ts', '*.test.ts'], environment: 'node' },
 })
