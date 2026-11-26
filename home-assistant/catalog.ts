@@ -1,6 +1,9 @@
-/** Offers the home-assistant module to boardd: slots on a Home Assistant controller. */
-import { type CatalogEntry } from 'boardlab'
+/**
+ * The `home-assistant` module, as the market offers it: slots on a Home Assistant board controller. A module from a
+ * market has no catalog entry, so what it is made with comes from its own context; this one needs nothing of it.
+ */
 import { homeAssistant as client } from './client.ts'
-import { homeAssistant } from './index.ts'
+import { homeAssistant as homeAssistantFactory } from './index.ts'
 
-export const entry: CatalogEntry = { id: 'home-assistant', about: 'Home Assistant 控制器上的槽位（需要 local）', create: () => homeAssistant({ client }) }
+/** The module boardd loads: `home-assistant`, titled in `index.ts`, with this machine's client. */
+export const homeAssistant = homeAssistantFactory({ client })
