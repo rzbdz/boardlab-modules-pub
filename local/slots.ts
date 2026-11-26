@@ -34,7 +34,8 @@ export const slotKey = (slot: number) => `slot:${slot}`
 export class Slots {
   private readonly drivers = new Map<string, SlotDriver>()
 
-  constructor(private readonly lab: BoardLab) {}
+  private readonly lab: BoardLab
+  constructor(lab: BoardLab) { this.lab = lab }
 
   addDriver(driver: SlotDriver) {
     if (this.drivers.has(driver.kind)) throw new Error(`slot driver ${driver.kind} is registered twice`)

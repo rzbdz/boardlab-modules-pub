@@ -19,7 +19,13 @@ const PLACEHOLDER = /^board-slot\d+(-\d+)?$/
 export class Scanner {
   private running: { id: string, cancelled: boolean, targets: string[] } | null = null
 
-  constructor(private readonly lab: BoardLab, private readonly slots: Slots, private readonly mux: Mux, private readonly hardware: Hardware, private readonly timing?: ScanTiming) {
+  private readonly lab: BoardLab
+  private readonly slots: Slots
+  private readonly mux: Mux
+  private readonly hardware: Hardware
+  private readonly timing?: ScanTiming
+  constructor(lab: BoardLab, slots: Slots, mux: Mux, hardware: Hardware, timing?: ScanTiming) {
+    this.lab = lab; this.slots = slots; this.mux = mux; this.hardware = hardware; this.timing = timing
     lab.kernel.db.prepare(`UPDATE scans SET status='failed', finished_at=?, message='boardd 重启，扫描中断' WHERE status='running'`).run(lab.kernel.iso())
   }
 

@@ -53,7 +53,8 @@ const SITE = `S=${HOST_SITE}; if [ ! -d "$S" ] && [ -d ${OLD_SITE} ]; then S=${O
 
 /** A failed sync, and the host's site after it: the one it had (put back), or not known. */
 export class SiteSyncError extends Error {
-  constructor(message: string, readonly left: 'previous' | 'unknown' = 'previous') { super(message) }
+  readonly left: 'previous' | 'unknown'
+  constructor(message: string, left: 'previous' | 'unknown' = 'previous') { super(message); this.left = left }
 }
 
 /** A shell script there, as root; its last lines when it does not get to its end, null when it does. */

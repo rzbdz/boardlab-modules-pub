@@ -150,7 +150,12 @@ export class Site {
    * `tree`: the boardctrl tree, whose shipped platforms the hosts layer under the site. `sshCommands`: the ways in for git over ssh.
    * `bin`: the boardctrl CLI that fetches the site's images (none: images are not fetched).
    */
-  constructor(readonly dir: string, private readonly settings: Settings, private readonly options: { tree?: string | null, sshCommands?: () => Promise<string[]>, bin?: string } = {}) {}
+  readonly dir: string
+  private readonly settings: Settings
+  private readonly options: { tree?: string | null, sshCommands?: () => Promise<string[]>, bin?: string }
+  constructor(dir: string, settings: Settings, options: { tree?: string | null, sshCommands?: () => Promise<string[]>, bin?: string } = {}) {
+    this.dir = dir; this.settings = settings; this.options = options
+  }
 
   get source(): 'managed' | 'git' { return this.settings.get('source') === 'git' ? 'git' : 'managed' }
   get url(): string { return this.settings.get('url') ?? '' }
