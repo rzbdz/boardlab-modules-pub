@@ -27,7 +27,7 @@ describe('the page parts the market carries', () => {
   const withUi = manifest.modules.filter(module => module.ui)
 
   it('has one for every module the page shows, and the file is there', () => {
-    expect(withUi.map(module => module.id).sort()).toEqual(['alerts', 'console-watch', 'feedback', 'human'])
+    expect(withUi.map(module => module.id).sort()).toEqual(['alerts', 'console-watch', 'feedback', 'human', 'market'])
     for (const module of withUi) expect(existsSync(join(here, module.ui!))).toBe(true)
   })
 
@@ -60,7 +60,8 @@ describe('the page parts the market carries', () => {
       const page = dirname(join(here, module.ui!))
       const docs = join(page, 'docs')
       if (!existsSync(docs)) continue
-      const help = /help:\s*['"]([^'"]+)['"]/.exec(readFileSync(join(here, module.ui!), 'utf8'))?.[1]
+      // The view's help link, and not a field's (`{ kind: 'text', …, help: '…' }`): a view's is by name.
+      const help = /\bhelp:\s*['"]([a-z0-9-]+\/[a-z0-9-]+)['"]/.exec(readFileSync(join(here, module.ui!), 'utf8'))?.[1]
       if (!help) continue
       const [owner, name] = help.split('/')
       expect(owner, `${module.id}: a help page of its own is named <module>/<page>`).toBe(module.id)
@@ -79,6 +80,6 @@ describe('this market as boardd loads it', () => {
     `, '--input-type=module', '--experimental-transform-types', '--no-warnings'], { encoding: 'utf8' })
     const read = JSON.parse(out.trim().split('\n').at(-1)!)
     expect(read.problems).toEqual([])
-    expect(read.modules.map((module: { id: string }) => module.id).sort()).toEqual(['alerts', 'console-watch', 'feedback', 'human', 'nexus-images'])
+    expect(read.modules.map((module: { id: string }) => module.id).sort()).toEqual(['alerts', 'console-watch', 'feedback', 'human', 'market', 'nexus-images'])
   })
 })

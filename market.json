@@ -68,6 +68,19 @@
         "alerts"
       ],
       "provide": []
+    },
+    {
+      "id": "market",
+      "title": "模块市场",
+      "about": "模块市场本身：加一个市场、看它们提供什么、装/卸模块、拉新版本并让 boardd 重新加载",
+      "tags": [
+        "module",
+        "market"
+      ],
+      "entry": "market/index.ts",
+      "ui": "market/ui.js",
+      "inject": [],
+      "provide": []
     }
   ]
 }
