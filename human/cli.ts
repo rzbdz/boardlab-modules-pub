@@ -4,7 +4,7 @@
  * not), and then continues; nothing here touches a board itself.
  */
 import { readFileSync } from 'node:fs'
-import { parseDuration, type Command, type CommandGroup } from 'boardlab'
+import { parseDuration, type RemoteCommand, type RemoteCommandGroup } from 'boardlab'
 
 /** The shape of a request, as `GET /api/human/request` and `POST /api/human/ask` return it. */
 interface HumanRequest {
@@ -30,7 +30,7 @@ const STATUS: Record<string, string> = { open: '等人处理', done: '做好了'
 const SOURCE: Record<string, string> = { ask: 'boardlab ask', relay: '板子等人操作' }
 const line = (item: HumanRequest) => `#${item.id}  [${item.kind}] ${item.title}\n    ${item.actor}，${new Date(item.at).toLocaleString()} · ${STATUS[item.status] ?? item.status} · 来自${SOURCE[item.source] ?? item.source}${item.resolution ? `：${item.resolution}` : ''}${item.body ? `\n    ${item.body.replace(/\n/g, '\n    ')}` : ''}`
 
-const ask: Command = {
+const ask: RemoteCommand = {
   name: 'ask', noBoard: true,
   usage: [
     'ask <标题> [--body <说明>|--body -] [--kind 插拔|接线|按键|…] [--context <JSON>] [--key <去重键>] [--timeout 10m] [--no-wait]\t请人做一件板子外面的事（插拔线、接板子、按按钮）：登记后等人点「我做好了」，等到结果再继续；--body - 从标准输入读说明；--no-wait 只登记不等待',
@@ -88,4 +88,4 @@ const ask: Command = {
   },
 }
 
-export const commands: CommandGroup = { id: 'human', summary: '请人做板子外面的事（插拔、接线、按键），看和关请求', title: '人工请求', commands: [ask] }
+export const commands: RemoteCommandGroup = { id: 'human', summary: '请人做板子外面的事（插拔、接线、按键），看和关请求', title: '人工请求', commands: [ask] }
