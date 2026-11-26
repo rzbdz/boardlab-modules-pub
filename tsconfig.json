@@ -14,6 +14,9 @@
       "boardlab": [
         "../better-boardlab/core/src/sdk.ts"
       ],
+      "boardlab/client": [
+        "../better-boardlab/core/src/shared/client.ts"
+      ],
       "boardlab/ui": [
         "../better-boardlab/src/sdk.browser.ts"
       ],

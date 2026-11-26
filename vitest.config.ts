@@ -13,6 +13,7 @@ export default defineConfig({
     alias: [
       { find: /^boardlab-core\/(.*)$/, replacement: `${resolve(boardlab, 'core/src')}/$1` },
       { find: /^boardlab\/ui$/, replacement: resolve(boardlab, 'src/sdk.browser.ts') },
+      { find: /^boardlab\/client$/, replacement: resolve(boardlab, 'core/src/shared/client.ts') },
       { find: /^boardlab$/, replacement: resolve(boardlab, 'core/src/sdk.ts') },
     ],
   },

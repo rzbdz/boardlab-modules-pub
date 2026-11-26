@@ -80,6 +80,6 @@ describe('this market as boardd loads it', () => {
     `, '--input-type=module', '--experimental-transform-types', '--no-warnings'], { encoding: 'utf8' })
     const read = JSON.parse(out.trim().split('\n').at(-1)!)
     expect(read.problems).toEqual([])
-    expect(read.modules.map((module: { id: string }) => module.id).sort()).toEqual(['alerts', 'console-watch', 'feedback', 'human', 'market', 'nexus-images', 'sftp-images', 'terminal'])
+    expect(read.modules.map((module: { id: string }) => module.id).sort()).toEqual(['alerts', 'boardlab', 'console-watch', 'feedback', 'human', 'market', 'nexus-images', 'sftp-images', 'terminal'])
   })
 })

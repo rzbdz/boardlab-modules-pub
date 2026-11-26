@@ -106,6 +106,18 @@
       "ui": "terminal/ui.js",
       "inject": [],
       "provide": []
+    },
+    {
+      "id": "boardlab",
+      "title": "boardlab 主机",
+      "about": "把别的 boardd（板卡主机上的）当成后端：一台一个实例（instances），板子、锁、队列、历史都转发过去，主机那边是权威",
+      "tags": [
+        "backend",
+        "hub"
+      ],
+      "entry": "boardlab/index.ts",
+      "inject": [],
+      "provide": []
     }
   ]
 }
