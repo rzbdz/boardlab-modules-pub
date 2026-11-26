@@ -94,6 +94,18 @@
       "entry": "sftp-images/index.ts",
       "inject": [],
       "provide": []
+    },
+    {
+      "id": "terminal",
+      "title": "终端",
+      "about": "网页里的 shell：每个是 boardd 机器上的 tmux 会话，断开、重连、boardd 重启都还在（只在大家都能用 shell 的机器上装）",
+      "tags": [
+        "terminal"
+      ],
+      "entry": "terminal/index.ts",
+      "ui": "terminal/ui.js",
+      "inject": [],
+      "provide": []
     }
   ]
 }

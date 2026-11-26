@@ -27,7 +27,7 @@ describe('the page parts the market carries', () => {
   const withUi = manifest.modules.filter(module => module.ui)
 
   it('has one for every module the page shows, and the file is there', () => {
-    expect(withUi.map(module => module.id).sort()).toEqual(['alerts', 'console-watch', 'feedback', 'human', 'market'])
+    expect(withUi.map(module => module.id).sort()).toEqual(['alerts', 'console-watch', 'feedback', 'human', 'market', 'terminal'])
     for (const module of withUi) expect(existsSync(join(here, module.ui!))).toBe(true)
   })
 
@@ -80,6 +80,6 @@ describe('this market as boardd loads it', () => {
     `, '--input-type=module', '--experimental-transform-types', '--no-warnings'], { encoding: 'utf8' })
     const read = JSON.parse(out.trim().split('\n').at(-1)!)
     expect(read.problems).toEqual([])
-    expect(read.modules.map((module: { id: string }) => module.id).sort()).toEqual(['alerts', 'console-watch', 'feedback', 'human', 'market', 'nexus-images', 'sftp-images'])
+    expect(read.modules.map((module: { id: string }) => module.id).sort()).toEqual(['alerts', 'console-watch', 'feedback', 'human', 'market', 'nexus-images', 'sftp-images', 'terminal'])
   })
 })
