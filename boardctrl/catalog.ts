@@ -5,7 +5,7 @@
  * it runs in (where the boardctrl CLI and its tree ship), boardd's state directory, and its settings.
  */
 import { instances, text, type Module, type PluginContext } from 'boardlab'
-import { boardctrl } from './index.ts'
+import { boardctrl as boardctrlFactory } from './index.ts'
 
 export const boardctrlModule: Module = {
   id: 'boardctrl',
@@ -16,7 +16,7 @@ export const boardctrlModule: Module = {
   was: ['bsp'],
   setup(lab, ctx: PluginContext) {
     const settings = ctx.config
-    return boardctrl({
+    return boardctrlFactory({
       bin: text(settings, 'bin') ?? process.env.BOARDS_BOARDCTRL ?? ctx.shipped('externals/boardctrl/bin/boardctrl')
         ?? ctx.shipped('externals/boardctrl/bin/bsp') ?? undefined,
       stateDir: ctx.stateDir, instances: settings.instances === undefined ? [] : instances(settings, 'boardctrl'),
@@ -24,3 +24,4 @@ export const boardctrlModule: Module = {
     }).setup(lab, ctx)
   },
 }
+export { boardctrlModule as boardctrl }
