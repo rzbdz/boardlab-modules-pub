@@ -118,6 +118,19 @@
       "entry": "boardlab/index.ts",
       "inject": [],
       "provide": []
+    },
+    {
+      "id": "clients",
+      "title": "客户端配置",
+      "about": "给编译机、笔记本装 boardlab 命令行，连到这台 boardd：加机器、装、看状态、删",
+      "tags": [
+        "clients",
+        "ssh"
+      ],
+      "entry": "clients/index.ts",
+      "ui": "clients/ui.js",
+      "inject": [],
+      "provide": []
     }
   ]
 }

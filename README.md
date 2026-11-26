@@ -20,6 +20,7 @@ boardlab market show pub
 | `console-watch` | 串口监控：老化/长跑时盯多块板的串口，命中或缺行发到通知总线；带 `boardlab watch` 命令，要 `alerts` | `console` `watch` |
 | `market` | 模块市场自己的页面：加市场、装/卸模块、拉新版本并让 boardd 重新加载 | `module` `market` |
 | `sftp-images` | 构建服务器上的目录（ssh）：每个目录是一个文件夹，里面符合 glob 的文件是镜像 | `images` `ssh` |
+| `clients` | 给编译机、笔记本装 boardlab 命令行，连到这台 boardd：加机器、装、看状态、删（页面上做） | `clients` `ssh` |
 
 ## 写一个模块
 
