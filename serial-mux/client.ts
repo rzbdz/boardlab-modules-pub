@@ -48,7 +48,8 @@ export class FrameDecoder {
 }
 
 export class SerialMux {
-  constructor(readonly home = process.env.SERIAL_MUX_HOME ?? join(homedir(), '.serial-mux')) {}
+  readonly home: string
+  constructor(home = process.env.SERIAL_MUX_HOME ?? join(homedir(), '.serial-mux')) { this.home = home }
 
   socketPath(alias: string) { return join(this.home, 'sock', `${alias}.sock`) }
 
