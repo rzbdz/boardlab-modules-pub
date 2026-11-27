@@ -25,6 +25,7 @@ boardlab market show pub
 | `home-assistant` | Home Assistant 上的复位/下载开关，槽位跟着控制器走（要 `local`） | `lab` `boards` |
 | `script-slots` | 脚本驱动的槽位：智能插座之类的脚本复位（要 `local`） | `lab` `boards` |
 | `boardctrl` | boardctrl 板卡主机和 SDK：板子接在别的 Linux 机器上，boardd 用 ssh 装上 boardctrld；带 `boardlab host`、`boardlab registry` 等命令 | `lab` `boards` `sdk` |
+| `login-disable` | 串口免密登录：识别串口上的 Bianbu/Ubuntu/Debian，自己登录一次，把串口 getty 改成自动登录，可还原；带 `boardlab login-disable` 命令 | `console` `login` |
 
 ## 写一个模块
 

@@ -192,6 +192,21 @@
       "was": [
         "bsp"
       ]
+    },
+    {
+      "id": "login-disable",
+      "title": "串口免密登录",
+      "about": "识别串口上的 Bianbu/Ubuntu/Debian，自己登录一次，把串口 getty 改成免密自动登录，可以还原；带 boardlab login-disable 命令",
+      "tags": [
+        "console",
+        "login",
+        "serial"
+      ],
+      "entry": "login-disable/index.ts",
+      "ui": "login-disable/ui.js",
+      "cli": "login-disable/cli.ts",
+      "inject": [],
+      "provide": []
     }
   ]
 }
