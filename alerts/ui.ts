@@ -12,6 +12,16 @@ import { action, alerts as readBus, call, notice, text, TOPIC_TEXT, TOPICS, type
 export { TOPICS, TOPIC_TEXT }
 const TONE: Record<string, 'error' | 'warn' | 'info'> = { failed: 'error', attention: 'warn', aging: 'warn', free: 'info', granted: 'info', stolen: 'warn' }
 
+/**
+ * An alert's words in a list row: its first line, and how many lines follow. A failure's body carries the run's whole
+ * message, and a console tail printed into a row is a wall that pushes every other alert off the page.
+ */
+const firstLine = (body: string): string => {
+  const lines = body.split('\n').filter(line => line.trim())
+  if (lines.length <= 1) return lines[0]?.trim() ?? ''
+  return `${lines[0]!.trim()}（另有 ${lines.length - 1} 行）`
+}
+
 let known: AlertsAnswer | null = null
 /** Read the bus, and keep it for the page to draw while the next read is on its way. */
 const load = async () => { known = await readBus(30); return known }
@@ -77,7 +87,7 @@ export const ui: ModuleUi = {
           items: recent.map(alert => ({
             key: String(alert.id),
             title: alert.title,
-            description: [alert.body, alert.board, `${at(alert.at)} · ${alert.actor}`, `发到：${alert.delivered.map(item => `${item.channel}${item.ok ? '' : '（失败）'}`).join('、') || '没有渠道'}`].filter(Boolean).join(' · '),
+            description: [firstLine(alert.body), alert.board, `${at(alert.at)} · ${alert.actor}`, `发到：${alert.delivered.map(item => `${item.channel}${item.ok ? '' : '（失败）'}`).join('、') || '没有渠道'}`].filter(Boolean).join(' · '),
             tag: TOPIC_TEXT[alert.topic as keyof typeof TOPIC_TEXT] ?? alert.topic,
             status: { tone: TONE[alert.topic] ?? 'info', text: TOPIC_TEXT[alert.topic as keyof typeof TOPIC_TEXT] ?? alert.topic },
           })),

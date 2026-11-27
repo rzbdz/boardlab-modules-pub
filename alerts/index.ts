@@ -125,6 +125,35 @@ export const TONES: Record<Topic, { colour: string, label: string }> = {
 /** A value inside a card's markdown: the characters that would otherwise turn it into formatting. */
 const plain = (text: string): string => text.replace(/([*_~`\[\]])/g, '\\$1')
 
+/** How much of an alert's own words a chat card carries: one glance, not a log dump. */
+export const CARD_BODY = 220
+
+/**
+ * An alert's body as a chat can carry it: its first sentence or two, and how many lines of it were left out.
+ *
+ * A failure's body is the run's whole message, and a run says a lot: the failure, then a console tail or a job's last
+ * lines. Those belong on the board's page, the run's log and the place the message names, not in a card nobody
+ * scrolls. So a body whose lines are console output keeps its first lines up to the limit and drops the rest, and a
+ * body that is already one line is cut after a sentence end where there is one near the limit. Either way what was
+ * dropped is counted, so a reader knows there is more and where to look.
+ */
+export function cardBody(body: string): { text: string, more: number } {
+  const text = body.trim()
+  if (!text) return { text: '', more: 0 }
+  const lines = text.split('\n').map(line => line.trim()).filter(Boolean)
+  if (lines.length > 1) {
+    // Console output: whole lines, until the next one would not fit. The first line is the failure and always goes.
+    const kept = [lines[0]!]
+    for (const line of lines.slice(1)) if (`${kept.join(' ')} ${line}`.length > CARD_BODY) break; else kept.push(line)
+    return { text: kept.join(' '), more: lines.length - kept.length }
+  }
+  const flat = text.replace(/ {2,}/g, ' ')
+  if (flat.length <= CARD_BODY) return { text: flat, more: 0 }
+  const at = Math.max(flat.lastIndexOf('。', CARD_BODY), flat.lastIndexOf('；', CARD_BODY), flat.lastIndexOf('. ', CARD_BODY), flat.lastIndexOf('; ', CARD_BODY))
+  const kept = at > CARD_BODY / 3 ? flat.slice(0, at + 1) : `${flat.slice(0, CARD_BODY).replace(/\s+\S*$/, '')}…`
+  return { text: kept, more: 1 }
+}
+
 /** A time as a person reads it in the chat: this boardd's own clock, minutes, no seconds. */
 function when(at: string): string {
   const date = new Date(at)
@@ -151,7 +180,10 @@ export function feishuPayload(alert: Pick<Alert, 'topic' | 'board' | 'title' | '
   if (alert.actor) field('发起', alert.actor)
 
   const elements: Array<Record<string, unknown>> = []
-  if (alert.body.trim()) elements.push({ tag: 'div', text: { tag: 'lark_md', content: alert.body.trim() } })
+  // The alert's own words, cut to what one glance reads; the rest stays on the board's page (see `cardBody`).
+  const shown = cardBody(alert.body)
+  if (shown.text) elements.push({ tag: 'div', text: { tag: 'lark_md', content: plain(shown.text) } })
+  if (shown.more > 0) elements.push({ tag: 'note', elements: [{ tag: 'plain_text', content: `还有 ${shown.more} 行没放在卡片里：在板子的页面看全（boardlab alerts）` }] })
   if (elements.length) elements.push({ tag: 'hr' })
   elements.push({ tag: 'div', fields })
   const footer = [where.machine ? `boardd ${where.machine}` : 'boardd', where.version ? `boardlab ${where.version}` : null].filter(Boolean).join(' · ')

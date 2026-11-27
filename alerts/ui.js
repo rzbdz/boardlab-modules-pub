@@ -1,6 +1,11 @@
 // alerts/ui.ts
 import { action, alerts as readBus, call, notice, text, TOPIC_TEXT, TOPICS } from "boardlab/ui";
 var TONE = { failed: "error", attention: "warn", aging: "warn", free: "info", granted: "info", stolen: "warn" };
+var firstLine = (body) => {
+  const lines = body.split("\n").filter((line) => line.trim());
+  if (lines.length <= 1) return lines[0]?.trim() ?? "";
+  return `${lines[0].trim()}\uFF08\u53E6\u6709 ${lines.length - 1} \u884C\uFF09`;
+};
 var known = null;
 var load = async () => {
   known = await readBus(30);
@@ -85,7 +90,7 @@ var ui = {
           items: recent.map((alert) => ({
             key: String(alert.id),
             title: alert.title,
-            description: [alert.body, alert.board, `${at(alert.at)} \xB7 ${alert.actor}`, `\u53D1\u5230\uFF1A${alert.delivered.map((item) => `${item.channel}${item.ok ? "" : "\uFF08\u5931\u8D25\uFF09"}`).join("\u3001") || "\u6CA1\u6709\u6E20\u9053"}`].filter(Boolean).join(" \xB7 "),
+            description: [firstLine(alert.body), alert.board, `${at(alert.at)} \xB7 ${alert.actor}`, `\u53D1\u5230\uFF1A${alert.delivered.map((item) => `${item.channel}${item.ok ? "" : "\uFF08\u5931\u8D25\uFF09"}`).join("\u3001") || "\u6CA1\u6709\u6E20\u9053"}`].filter(Boolean).join(" \xB7 "),
             tag: TOPIC_TEXT[alert.topic] ?? alert.topic,
             status: { tone: TONE[alert.topic] ?? "info", text: TOPIC_TEXT[alert.topic] ?? alert.topic }
           }))

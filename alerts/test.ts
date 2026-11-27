@@ -11,7 +11,7 @@ import { createServer } from 'node:http'
 import type { AddressInfo } from 'node:net'
 import { openDatabase } from 'boardlab-core/core/db.ts'
 import { BoardLab } from 'boardlab-core/core/lab.ts'
-import { alerts, feishuPayload, matches } from './index.ts'
+import { alerts, cardBody, CARD_BODY, feishuPayload, matches } from './index.ts'
 
 const dirs: string[] = []
 /** A directory this test owns, removed after it. */
@@ -140,5 +140,30 @@ describe('the notification bus', () => {
     // An alert with no body still has its fields; no empty div is left in the card.
     const bare = feishuPayload({ topic: 'aging', board: null, title: 'aging-1：panic', body: '', at: 'now' })
     expect(bare.card.elements[0]).toMatchObject({ tag: 'div', fields: expect.any(Array) })
+  })
+
+  it('cuts a body that is a console dump to one glance, and says how much was left out', () => {
+    // A boot hook's failure carries the board's console tail; a card with all of it is a wall nobody reads.
+    const dump = ['EDK2 DHCP got no IPv4 address (media state / GMAC init); console tail:', ...Array.from({ length: 12 }, () => ''), ...Array.from({ length: 12 }, (_, i) => i % 2 ? 'FSOpen: Open \'\\\' Success' : 'FS0:\\> ifconfig -l')].join('\n')
+    const card = feishuPayload({ topic: 'failed', board: 'board-1', title: 'board-1：启动中失败', body: dump, at: '2026-11-26T09:05:00.000Z' })
+    const text = JSON.stringify(card.card.elements)
+    // The failure itself stays: a person reads what went wrong in the group.
+    expect(text).toContain('EDK2 DHCP got no IPv4 address')
+    // The card is bounded whatever the body was, the rest is counted, and the card says where the whole of it is.
+    expect(cardBody(dump).text.length).toBeLessThanOrEqual(CARD_BODY + 1)
+    expect(cardBody(dump).text).not.toContain('\n')
+    // What was dropped is countable: the card's own lines plus `more` are all the body's lines.
+    const shownLines = cardBody(dump).text.split(/(?=FSOpen: Open|FS0:\\>)/).length
+    expect(cardBody(dump).more).toBe(dump.split('\n').filter(line => line.trim()).length - shownLines)
+    expect(cardBody(dump).more).toBeGreaterThan(0)
+    expect(text).toMatch(/还有 \d+ 行没放在卡片里/)
+    expect(text).not.toContain(dump.split('\n').at(-1)!.repeat(1) + ' FSOpen: Open')
+    // A long body with no line break is cut at the limit, after a sentence end where there is one.
+    const run = `${'x'.repeat(40)} ${'y'.repeat(400)}`
+    expect(cardBody(run).text.length).toBeLessThanOrEqual(CARD_BODY + 1)
+    expect(cardBody(run).more).toBe(1)
+    expect(cardBody(`${'a'.repeat(200)}。${'b'.repeat(200)}`).text.endsWith('。')).toBe(true)
+    // A short body goes as it is, with nothing counted.
+    expect(cardBody('GPIO 超时')).toEqual({ text: 'GPIO 超时', more: 0 })
   })
 })

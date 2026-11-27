@@ -111,9 +111,9 @@ describe('console and firmware', () => {
     await svc.locks.lock('com260', 'user:dana', '读型号')
     await svc.download.stage('com260', { holder: 'user:dana' }, { firmware: 'minor-board-info' })
     expect(bench.staged.get('3-2.3')).toBe(file)
-    await expect(svc.download.stage('com260', { holder: 'user:dana' }, { firmware: 'fsbl' })).rejects.toThrow(/没有自带 k3 的固件 fsbl/)
+    await expect(svc.download.stage('com260', { holder: 'user:dana' }, { firmware: 'fsbl' })).rejects.toThrow(/没有可加载的 k3 固件 fsbl/)
     writeFileSync(file, 'tampered')
-    await expect(svc.download.stage('com260', { holder: 'user:dana' }, { firmware: 'minor-board-info' })).rejects.toThrow(/sha256 与 firmware.json 不符/)
+    await expect(svc.download.stage('com260', { holder: 'user:dana' }, { firmware: 'minor-board-info' })).rejects.toThrow(/sha256 与它的清单不符/)
   })
 
   it('stops a load when it is cancelled: fastboot gets the signal, and the next file is never sent', async () => {
@@ -179,7 +179,7 @@ describe('console and firmware', () => {
     order.length = 0
     await svc.download.boot('com260', claude, { files: ['fsbl', files[2]!] })
     expect(order).toEqual([fsbl, files[2]])
-    await expect(svc.download.boot('com260', claude, { files: ['u-boot-opensbi', files[2]!] })).rejects.toThrow(/没有自带固件 u-boot-opensbi/)
+    await expect(svc.download.boot('com260', claude, { files: ['u-boot-opensbi', files[2]!] })).rejects.toThrow(/没有可加载的固件 u-boot-opensbi/)
 
     // A stage that never brings the port back stops the boot before the next file.
     order.length = 0
