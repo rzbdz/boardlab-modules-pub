@@ -24,6 +24,7 @@ const alerts: RemoteCommand = {
   name: 'alerts', noBoard: true,
   usage: [
     'alerts [list] [--limit N]\t最近的通知，以及装了哪些渠道（boardlab alerts channel 看渠道）',
+    'alerts show <编号>\t查看一条通知的完整正文',
     'alerts raise <标题> [--topic failed|attention|aging|free|granted|stolen] [--board 板子] [--body 内容] [--tag a,b]\t主动发一条通知，按渠道规则推出去',
     'alerts channel [list]\t有哪些通知渠道、各自的规则和上次投递的结果',
     'alerts channel add <id> <飞书 webhook 地址> [--title 名字] [--topic a,b] [--tag a,b]\t加一个飞书群渠道（webhook 只写不回）',
@@ -33,6 +34,13 @@ const alerts: RemoteCommand = {
   ],
   async run({ args, client, flag, flags, out }) {
     const [action, ...rest] = args
+    if (action === 'show') {
+      const [id] = rest
+      if (rest.length !== 1 || !id || !/^[1-9]\d*$/.test(id)) throw new Error('用法：boardlab alerts show <编号>')
+      const { alert } = await client.call<{ alert: Alert }>('GET', `/api/alerts/records/${id}`)
+      out(alert, () => console.log(`#${alert.id}  ${alert.title}\n${alert.body}`))
+      return
+    }
     if (action === 'raise') {
       const title = rest.join(' ').trim()
       if (!title) throw new Error('用法：boardlab alerts raise <标题> [--topic …] [--board 板子] [--body 内容] [--tag a,b]')
