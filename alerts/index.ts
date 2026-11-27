@@ -128,30 +128,13 @@ const plain = (text: string): string => text.replace(/([*_~`\[\]])/g, '\\$1')
 /** How much of an alert's own words a chat card carries: one glance, not a log dump. */
 export const CARD_BODY = 220
 
-/**
- * An alert's body as a chat can carry it: its first sentence or two, and how many lines of it were left out.
- *
- * A failure's body is the run's whole message, and a run says a lot: the failure, then a console tail or a job's last
- * lines. Those belong on the board's page, the run's log and the place the message names, not in a card nobody
- * scrolls. So a body whose lines are console output keeps its first lines up to the limit and drops the rest, and a
- * body that is already one line is cut after a sentence end where there is one near the limit. Either way what was
- * dropped is counted, so a reader knows there is more and where to look.
- */
-export function cardBody(body: string): { text: string, more: number } {
-  const text = body.trim()
-  if (!text) return { text: '', more: 0 }
-  const lines = text.split('\n').map(line => line.trim()).filter(Boolean)
-  if (lines.length > 1) {
-    // Console output: whole lines, until the next one would not fit. The first line is the failure and always goes.
-    const kept = [lines[0]!]
-    for (const line of lines.slice(1)) if (`${kept.join(' ')} ${line}`.length > CARD_BODY) break; else kept.push(line)
-    return { text: kept.join(' '), more: lines.length - kept.length }
-  }
-  const flat = text.replace(/ {2,}/g, ' ')
-  if (flat.length <= CARD_BODY) return { text: flat, more: 0 }
-  const at = Math.max(flat.lastIndexOf('。', CARD_BODY), flat.lastIndexOf('；', CARD_BODY), flat.lastIndexOf('. ', CARD_BODY), flat.lastIndexOf('; ', CARD_BODY))
-  const kept = at > CARD_BODY / 3 ? flat.slice(0, at + 1) : `${flat.slice(0, CARD_BODY).replace(/\s+\S*$/, '')}…`
-  return { text: kept, more: 1 }
+/** Only the first nonblank line belongs in the preview; the stored alert keeps the rest. */
+export function cardBody(body: string): { text: string, omitted: boolean } {
+  const trimmed = body.trim()
+  const first = trimmed.split(/[\r\n\u2028\u2029]/, 1)[0]!.trimEnd()
+  const chars = Array.from(first)
+  const clipped = chars.length > CARD_BODY
+  return { text: clipped ? `${chars.slice(0, CARD_BODY - 1).join('').trimEnd()}…` : first, omitted: clipped || first !== trimmed }
 }
 
 /** A time as a person reads it in the chat: this boardd's own clock, minutes, no seconds. */
@@ -170,7 +153,7 @@ function when(at: string): string {
  * raised it. Feishu's webhook takes the card as `msg_type: 'interactive'` with the card under `card`; its older `post`
  * shape is a wall of text nobody scans.
  */
-export function feishuPayload(alert: Pick<Alert, 'topic' | 'board' | 'title' | 'body' | 'at'> & { actor?: string }, where: { version?: string, machine?: string } = {}) {
+export function feishuPayload(alert: Pick<Alert, 'topic' | 'board' | 'title' | 'body' | 'at'> & { actor?: string, id?: number }, where: { version?: string, machine?: string } = {}) {
   const tone = TONES[alert.topic]
   const fields: Array<{ is_short: boolean, text: { tag: 'lark_md', content: string } }> = []
   const field = (label: string, value: string) => fields.push({ is_short: true, text: { tag: 'lark_md', content: `**${label}**\n${plain(value)}` } })
@@ -180,10 +163,9 @@ export function feishuPayload(alert: Pick<Alert, 'topic' | 'board' | 'title' | '
   if (alert.actor) field('发起', alert.actor)
 
   const elements: Array<Record<string, unknown>> = []
-  // The alert's own words, cut to what one glance reads; the rest stays on the board's page (see `cardBody`).
   const shown = cardBody(alert.body)
-  if (shown.text) elements.push({ tag: 'div', text: { tag: 'lark_md', content: plain(shown.text) } })
-  if (shown.more > 0) elements.push({ tag: 'note', elements: [{ tag: 'plain_text', content: `还有 ${shown.more} 行没放在卡片里：在板子的页面看全（boardlab alerts）` }] })
+  if (shown.text) elements.push({ tag: 'div', text: { tag: 'plain_text', content: shown.text } })
+  if (shown.omitted) elements.push({ tag: 'note', elements: [{ tag: 'plain_text', content: alert.id ? `查看完整通知：boardlab alerts show ${alert.id}` : '查看最近的完整通知：boardlab alerts' }] })
   if (elements.length) elements.push({ tag: 'hr' })
   elements.push({ tag: 'div', fields })
   const footer = [where.machine ? `boardd ${where.machine}` : 'boardd', where.version ? `boardlab ${where.version}` : null].filter(Boolean).join(' · ')
@@ -367,6 +349,15 @@ export function alerts(options: AlertOptions = {}): Module<{ raise(alert: { topi
           method: 'GET', path: '/api/alerts',
           about: '最近的通知（?limit=，默认 50），以及装了哪些渠道、各自的规则和上次投递的结果',
           handle: ({ query }) => ({ alerts: list(Math.max(1, Math.min(Number(query.get('limit') ?? 50) || 50, 500))), channels: channels().map(channel => ({ ...channel, url: mask(channel.url) })) }),
+        },
+        {
+          method: 'GET', path: '/api/alerts/records/:id',
+          about: '按编号查看完整通知',
+          handle: ({ params }) => {
+            const row = k.db.prepare('SELECT * FROM alerts WHERE id=?').get(params.id!) as Row | undefined
+            if (!row) throw new BoardError('not-found', `没有通知 #${params.id}`)
+            return { alert: record(row) }
+          },
         },
         {
           method: 'POST', path: '/api/alerts',

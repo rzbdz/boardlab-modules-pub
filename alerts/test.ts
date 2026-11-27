@@ -142,28 +142,26 @@ describe('the notification bus', () => {
     expect(bare.card.elements[0]).toMatchObject({ tag: 'div', fields: expect.any(Array) })
   })
 
-  it('cuts a body that is a console dump to one glance, and says how much was left out', () => {
-    // A boot hook's failure carries the board's console tail; a card with all of it is a wall nobody reads.
-    const dump = ['EDK2 DHCP got no IPv4 address (media state / GMAC init); console tail:', ...Array.from({ length: 12 }, () => ''), ...Array.from({ length: 12 }, (_, i) => i % 2 ? 'FSOpen: Open \'\\\' Success' : 'FS0:\\> ifconfig -l')].join('\n')
-    const card = feishuPayload({ topic: 'failed', board: 'board-1', title: 'board-1：启动中失败', body: dump, at: '2026-11-26T09:05:00.000Z' })
-    const text = JSON.stringify(card.card.elements)
-    // The failure itself stays: a person reads what went wrong in the group.
-    expect(text).toContain('EDK2 DHCP got no IPv4 address')
-    // The card is bounded whatever the body was, the rest is counted, and the card says where the whole of it is.
-    expect(cardBody(dump).text.length).toBeLessThanOrEqual(CARD_BODY + 1)
-    expect(cardBody(dump).text).not.toContain('\n')
-    // What was dropped is countable: the card's own lines plus `more` are all the body's lines.
-    const shownLines = cardBody(dump).text.split(/(?=FSOpen: Open|FS0:\\>)/).length
-    expect(cardBody(dump).more).toBe(dump.split('\n').filter(line => line.trim()).length - shownLines)
-    expect(cardBody(dump).more).toBeGreaterThan(0)
-    expect(text).toMatch(/还有 \d+ 行没放在卡片里/)
-    expect(text).not.toContain(dump.split('\n').at(-1)!.repeat(1) + ' FSOpen: Open')
-    // A long body with no line break is cut at the limit, after a sentence end where there is one.
-    const run = `${'x'.repeat(40)} ${'y'.repeat(400)}`
-    expect(cardBody(run).text.length).toBeLessThanOrEqual(CARD_BODY + 1)
-    expect(cardBody(run).more).toBe(1)
-    expect(cardBody(`${'a'.repeat(200)}。${'b'.repeat(200)}`).text.endsWith('。')).toBe(true)
-    // A short body goes as it is, with nothing counted.
-    expect(cardBody('GPIO 超时')).toEqual({ text: 'GPIO 超时', more: 0 })
+  it('posts the cause without the console tail and keeps the exact diagnostic by id', async () => {
+    const fake = poster(), lab = labWith(fake.post, 'preview')
+    await call(lab, 'POST', '/api/alerts/channels', { id: 'chat', kind: 'feishu', url: 'https://example.invalid/hook' })
+    const body = '\r\n  DHCP returned no IPv4 address\r\nfixture> inspect\r\nfixture> inspect'
+    const { alert } = await call(lab, 'POST', '/api/alerts', { topic: 'failed', title: 'Boot failed', body })
+    expect(fake.sent).toHaveLength(1)
+    const card = JSON.stringify(fake.sent[0]!.payload)
+    expect(card).toContain('DHCP returned no IPv4 address')
+    expect(card).not.toContain('fixture>')
+    expect(card).toContain(`boardlab alerts show ${alert.id}`)
+    expect((await call(lab, 'GET', `/api/alerts/records/${alert.id}`)).alert.body).toBe(body)
+    await expect(call(lab, 'GET', '/api/alerts/records/999')).rejects.toMatchObject({ code: 'not-found' })
+  })
+
+  it('bounds even the first line and leaves a short cause unchanged', () => {
+    const long = '板'.repeat(CARD_BODY + 30)
+    for (const body of [long, `${long}\nconsole output`]) {
+      expect(cardBody(body)).toEqual({ text: '板'.repeat(CARD_BODY - 1) + '…', omitted: true })
+    }
+    expect(cardBody('GPIO 超时')).toEqual({ text: 'GPIO 超时', omitted: false })
+    expect(cardBody('  \n')).toEqual({ text: '', omitted: false })
   })
 })
