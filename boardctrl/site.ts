@@ -464,11 +464,12 @@ export class Site {
   }
 
   /**
-   * Guidance by level, as `boardlab guidance` asks it: the general hints, one SoC's notes beside its profile, one
-   * SDK's skill. A later layer's file with the same name wins, as with every other kind of site data; only the
-   * configuration layers are read, so an agent can ask any time and gets the same answer every host has.
+   * Guidance by level, as `boardlab guidance` asks it: the general hints, one SoC's notes beside its profile, and
+   * each asked SDK's skill (`sdks`: a board lists every SDK it can be booted with, and all of them apply to it). A
+   * later layer's file with the same name wins, as with every other kind of site data; only the configuration layers
+   * are read, so an agent can ask any time and gets the same answer every host has.
    */
-  guidance(options: { soc?: string | null, sdk?: string | null } = {}): { blocks: Array<{ name: string, layer: string, text: string }>, socs: string[], skills: string[], hints: string[] } {
+  guidance(options: { soc?: string | null, sdk?: string | null, sdks?: string[] } = {}): { blocks: Array<{ name: string, layer: string, text: string }>, socs: string[], skills: string[], hints: string[] } {
     const blocks: Array<{ name: string, layer: string, text: string }> = []
     const socs = new Set<string>(), skills = new Set<string>(), hints = new Set<string>()
     for (const layer of this.layers()) {
@@ -479,7 +480,8 @@ export class Site {
       const skillDir = join(layer.root, 'skills')
       if (existsSync(skillDir)) for (const name of readdirSync(skillDir).filter(name => name.endsWith('.md')).sort()) skills.add(name.slice(0, -3))
     }
-    const wanted = options.soc || options.sdk
+    const asked = [options.sdk, ...(options.sdks ?? [])].filter((id): id is string => !!id && !!id.trim())
+    const wanted = options.soc || asked.length
     if (!wanted) {
       const seen = new Map<string, { name: string, layer: string, text: string }>()
       for (const layer of this.layers()) {
@@ -501,14 +503,21 @@ export class Site {
       }
       blocks.push(...seen.values())
     }
-    if (options.sdk) {
+    // Several SDKs of one board often carry the same skill word for word (`k2`, `k2-clean`): it is shown once, named
+    // with every SDK it is the skill of, so a block for each SDK is still findable.
+    const shared = new Map<string, { name: string, layer: string, text: string, ids: string[] }>()
+    for (const id of [...new Set(asked)]) {
       let found: { name: string, layer: string, text: string } | null = null
       for (const layer of this.layers()) {
-        const file = join(layer.root, 'skills', `${options.sdk}.md`)
-        if (existsSync(file)) found = { name: options.sdk, layer: layer.name, text: readFileSync(file, 'utf8').trim() }
+        const file = join(layer.root, 'skills', `${id}.md`)
+        if (existsSync(file)) found = { name: id, layer: layer.name, text: readFileSync(file, 'utf8').trim() }
       }
-      if (found) blocks.push(found)
+      if (!found) continue
+      const same = shared.get(found.text)
+      if (same) same.ids.push(id)
+      else shared.set(found.text, { ...found, ids: [id] })
     }
+    for (const block of shared.values()) blocks.push({ name: block.ids.join(' / '), layer: block.layer, text: block.text })
     return { blocks, socs: [...socs].sort(), skills: [...skills].sort(), hints: [...hints].sort() }
   }
 

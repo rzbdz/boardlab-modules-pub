@@ -855,6 +855,17 @@ describe('guidance by level', () => {
     const sdk = site.guidance({ sdk: 'bsp-a' })
     expect(sdk.blocks).toEqual([{ name: 'bsp-a', layer: 'site', text: '# bsp-a\nbuild with `make a`' }])
 
+    // A board lists every SDK it can be booted with: each of their skills arrives, and one shared word for word is
+    // shown once, named with every SDK it is the skill of.
+    writeFileSync(join(other, 'skills', 'bsp-b.md'), '# bsp-b\nbuild with `make b`\n')
+    writeFileSync(join(other, 'skills', 'bsp-c.md'), '# bsp-a\nbuild with `make a`\n')
+    git(other, 'add', '.'); git(other, 'commit', '-qm', 'more skills'); git(other, 'push', '-q', 'origin', 'main')
+    await site.pull('user:alice')
+    const board = site.guidance({ soc: 'soc-a', sdk: 'bsp-a', sdks: ['bsp-a', 'bsp-b', 'bsp-c', 'gone'] })
+    expect(board.blocks.map(block => block.name)).toEqual(['soc-a/notes.md', 'soc-a/soc.yaml', 'bsp-a / bsp-c', 'bsp-b'])
+    expect(board.blocks[2]!.text).toContain('make a')
+    expect(board.blocks[3]!.text).toContain('make b')
+
     // Asking for a level nothing carries is an answer of nothing, not an error: the page says so.
     expect(site.guidance({ soc: 'nope' }).blocks).toEqual([])
     expect(site.guidance({ sdk: 'nope' }).blocks).toEqual([])

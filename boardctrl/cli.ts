@@ -349,7 +349,7 @@ const guidance: Command = {
     'guidance [--list]\t分层知识：通用提示、有笔记的 SoC、有 skill 的 SDK（--list 只说有哪些）',
     'guidance --soc <soc>\t这颗 SoC 的笔记和它的资料在哪（socs/<soc>/*.md）',
     'guidance --sdk <sdk>\t这个 SDK 自己的 SKILL.md（构建、启动、刷机怎么做）',
-    'guidance --dut <板>\t这个板子适用的全部知识：问它的 SoC 和 SDK，自动带上各层（先看板子的 lab.soc、lab.sdks）',
+    'guidance --dut <板>\t这个板子适用的全部知识：问它的 SoC 和它列出的每个 SDK，自动带上各层（先看板子的 lab.soc、lab.sdks）',
   ],
   async run({ client, flag, flags, out }) {
     if (flags.has('list')) {
@@ -363,16 +363,17 @@ const guidance: Command = {
     const query = new URLSearchParams()
     const dut = flag('dut')
     if (dut) {
-      // The board says which levels apply; its host is the authority on its SoC and SDKs.
+      // The board says which levels apply; its host is the authority on its SoC and SDKs — every SDK it can be booted
+      // with, so the answer carries the skill of each (a K3 board lists six).
       const detail = await client.board(dut)
       const soc = flag('soc') ?? detail.board.soc ?? ''
       const sdks = flag('sdk') ? [flag('sdk')!] : (detail.board.lab?.sdks ?? [])
       if (soc) query.set('soc', soc)
-      for (const sdk of sdks) query.set('sdk', sdk)
+      for (const sdk of sdks) query.append('sdk', sdk)
       if (!soc && !sdks.length) throw new Error(`${dut} 还没有登记 SoC 和 SDK：先 boardlab set ${dut} --soc <soc>，或用 guidance --list 看有哪些`)
     } else {
       if (flag('soc')) query.set('soc', flag('soc')!)
-      if (flag('sdk')) query.set('sdk', flag('sdk')!)
+      if (flag('sdk')) query.append('sdk', flag('sdk')!)
     }
     const got = await client.call<{ blocks: unknown[], text: string }>('GET', `/api/boardctrl/site/guidance?${query}`)
     out(got, () => process.stdout.write(got.text.endsWith('\n') ? got.text : `${got.text}\n`))

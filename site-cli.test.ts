@@ -43,6 +43,9 @@ function answer(req: IncomingMessage, res: ServerResponse) {
     requests.push({ method: req.method!, url: req.url!, body })
     const json = (status: number, value: unknown) => { res.writeHead(status, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(value)) }
     if (req.method === 'GET' && req.url === '/api/boardctrl/site') return json(200, site)
+    if (req.method === 'GET' && req.url?.startsWith('/api/board?name=')) {
+      return json(200, { board: { name: 'board-a', soc: 'soc-a', lab: { sdks: ['sdk-a', 'sdk-b'] } }, history: [], leases: [] })
+    }
     if (req.method === 'GET' && req.url === '/api/boardctrl/site/skills') return json(200, { skills: site.skills })
     if (req.method === 'GET' && req.url?.startsWith('/api/boardctrl/site/skill?')) {
       const id = new URL(req.url, 'http://x').searchParams.get('id') ?? ''
@@ -120,6 +123,13 @@ describe('boardlab guidance', () => {
     await runG([], { soc: 'soc-a', sdk: 'sdk-a' })
     const asked = new URL(requests.at(-1)!.url!, 'http://x').searchParams
     expect([asked.get('soc'), asked.get('sdk')]).toEqual(['soc-a', 'sdk-a'])
+  })
+
+  it('asks for every SDK a board lists, so each one\'s skill comes back', async () => {
+    requests.length = 0
+    await runG([], { dut: 'board-a' })
+    const asked = new URL(requests.at(-1)!.url!, 'http://x').searchParams
+    expect(asked.getAll('sdk')).toEqual(['sdk-a', 'sdk-b'])
   })
 })
 

@@ -66,9 +66,9 @@ export function siteEndpoints(lab: BoardLab, site: Site, hosts: Hosts | null): E
   }
 
   return [{
-    method: 'GET', path: '/api/boardctrl/site/guidance', about: '分层知识：通用提示、一颗 SoC 的笔记（socs/<soc>/*.md）、一个 SDK 的 skill（skills/<id>.md）；soc/sdk 都给了就给两个，不给给通用提示；同时列出可问的层级',
+    method: 'GET', path: '/api/boardctrl/site/guidance', about: '分层知识：通用提示、一颗 SoC 的笔记（socs/<soc>/*.md）、若干 SDK 的 skill（skills/<id>.md，sdk 可给多次）；给了哪层就给哪层，不给给通用提示；同时列出可问的层级',
     handle: ({ query }) => {
-      const got = site.guidance({ soc: text(query.get('soc')), sdk: text(query.get('sdk')) })
+      const got = site.guidance({ soc: text(query.get('soc')), sdk: text(query.get('sdk')), sdks: query.getAll('sdk') })
       return {
         blocks: got.blocks,
         text: got.blocks.map(block => `## ${block.name} (${block.layer})\n${block.text}`).join('\n\n') || '这一层还没有内容',
