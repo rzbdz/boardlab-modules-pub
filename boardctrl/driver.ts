@@ -686,7 +686,7 @@ export function boardctrlLab(options: BoardctrlOptions = {}): BoardctrlBackend {
         // A link is downloaded by the board host itself; a file here is uploaded by boardctrl, checked against its sha256.
         const job = await boardctrlCli<{ job?: string, lines?: string[], flasher?: string, elapsed_s?: number }>(config, ['dut', 'flash', device,
           '--package', pkg.url ?? pkg.path!, ...(pkg.sha256 ? ['--sha256', pkg.sha256] : []), ...(pkg.flasher ? ['--flasher', pkg.flasher] : []), ...(pkg.refresh && pkg.url ? ['--refresh'] : []),
-          ...(pkg.partitions?.length ? ['--partitions', pkg.partitions.join(',')] : []),
+          ...(pkg.partitions?.length ? ['--partitions', pkg.partitions.join(',')] : []), ...(pkg.layout ? ['--layout', pkg.layout] : []),
           ...lease(token), '--timeout', '3600'], 3_600_000 + 60_000, reportingJob(progress, report), undefined, signal, at)
         const lines = job.lines ?? []
         return [...lines, ...(job.flasher ? [`刷机工具：${job.flasher}${job.elapsed_s ? `，用时 ${Math.round(job.elapsed_s)} 秒` : ''}`] : [])].join('\n')
