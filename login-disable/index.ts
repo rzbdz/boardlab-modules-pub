@@ -145,7 +145,15 @@ const PASSWORD_PROMPT = /(?:password|密码)\s*[:：]\s*$/i
 class Talk {
   private text: string
   private readonly leave: () => void
-  constructor(private readonly lab: BoardLab, private readonly board: string, private readonly caller: { holder: string, token: string | null }, session: ConsoleSession) {
+  // Fields written out, not constructor parameter properties: boardd loads a module with Node's strip-only TypeScript,
+  // which erases types but refuses parameter properties, and the module then does not load at all.
+  private readonly lab: BoardLab
+  private readonly board: string
+  private readonly caller: { holder: string, token: string | null }
+  constructor(lab: BoardLab, board: string, caller: { holder: string, token: string | null }, session: ConsoleSession) {
+    this.lab = lab
+    this.board = board
+    this.caller = caller
     this.text = (session.history ?? []).join('\n')
     this.leave = session.onOutput(data => { this.text += data.toString('utf8') })
   }
